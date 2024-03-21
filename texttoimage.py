@@ -32,8 +32,6 @@ def strtoimg(text, color, scale, dims=[], chars=chars):
 
 def imgtostr(img, color, scale, chars=chars, res=[]):
 
-	print(img.size)
-
 	img = img.resize((int(img.size[0] / scale), int(img.size[1] / scale)), resample=Image.BOX)
 	# checking whether inputted image is file or image object
 	try:
@@ -51,7 +49,7 @@ def imgtostr(img, color, scale, chars=chars, res=[]):
 	# GRAYSCALE: Getting the value of each pixel and mapping it to character
 
 	data = [chars[grid[x,y][p]] for y in range(column) for x in range(row) for p in range(3)] if color else [chars[grid[x,y]] for y in range(column ) for x in range(row)]
-	return ''.join(data).rstrip('Ł')							# Removing filler data
+	return ''.join(data).rstrip(' ').rstrip('Ł')						# Removing filler data
 
 
 def Limgtostr(img, highchar, lowchar): # USED FOR LASER CNC, WORKS FOR BW IMAGES
@@ -63,15 +61,20 @@ def Limgtostr(img, highchar, lowchar): # USED FOR LASER CNC, WORKS FOR BW IMAGES
 	# return [data[i:i+row] for i in range(0, len(data), row)]
 
 
-def texttovid(text, framelength, name, fps, scale, color):
+def texttovid(text, framelength, name, fps, scale, color, test):
 	
 	# splitting text into sections (framelength)
-	text = [text[i:i + framelength] + '`' for i in range(0, len(text), framelength)]
+	text = [text[i:i + framelength] for i in range(0, len(text), framelength)]
 	print('split text')
 
 	# creating images for each text section
-	res = [np.array(strtoimg(i, color, scale)) for i in text]
+	res = [strtoimg((i + 'ŁŁ'), color, scale) for i in text]
 	print('created images')
+
+	if test:
+		tests = [True if imgtostr(res[i], color, scale).rstrip('ŁŁŁ') == text[i] else False for i in range(len(text))]
+		print(tests)
+		return None
 
 	# creating video
 	codec = cv2.VideoWriter_fourcc(*'mp4v')
@@ -79,11 +82,13 @@ def texttovid(text, framelength, name, fps, scale, color):
 	print('created video')
 
 	# writing each image to video
+	if color:
+		grading = cv2.COLOR_RGB2BGR
+	else:
+		grading = cv2.COLOR_GRAY2BGR
+
 	for i in res:
-		if color:
-			video.write(cv2.cvtColor(i, cv2.COLOR_RGB2BGR))
-		else:
-			video.write(cv2.cvtColor(i, cv2.COLOR_GRAY2BGR))
+		video.write(cv2.cvtColor(np.array(i), grading))
 	print('wrote files')
 
 	# releasing video
@@ -93,6 +98,7 @@ def texttovid(text, framelength, name, fps, scale, color):
 
 
 def test(text, color, scale):
+	return True
 	a = strtoimg(text, color, scale)
 	a.show()
 	print(imgtostr(a, color, scale))
@@ -100,5 +106,5 @@ def test(text, color, scale):
 # texttovid(text, 4, 'test1', 4, 1, False)
 
 text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae nibh ipsum. Mauris aliquet sed quam eu malesuada. Etiam ultrices ex quis odio tincidunt posuere. Nunc nisl nibh, hendrerit egestas porta vel, maximus quis risus. Vestibulum id tellus nec est elementum mollis sit amet faucibus est. Nam eget sagittis arcu. Nam vitae nisl felis. Duis varius ornare leo ac cursus. Maecenas hendrerit convallis leo, interdum hendrerit ligula posuere quis. Vivamus tortor urna, aliquam quis pulvinar ut, fringilla vitae est. Nullam dapibus quam vel mollis auctor. Curabitur sagittis, tortor nec tempor accumsan, libero lectus accumsan sem, vitae vehicula felis nulla sed neque. Vivamus elementum, erat vel venenatis interdum, velit libero viverra neque, ornare ultrices nisl justo a orci. Phasellus a metus ex. In nec purus bibendum, accumsan nulla eget, maximus sem. Morbi non feugiat urna, sed luctus libero.'
-texttovid(text * 10, 64, 'test1', 32, 100, False)
+texttovid(text, 40, 'test1', 6, 10, True, True)
 # test(text, True, 100)
