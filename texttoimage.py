@@ -10,9 +10,11 @@ chars = [' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '
 
 
 def strtoimg(text, color, scale, dims=[], chars=chars):
-	data = [chars.index(i) for i in text]				# Mapping each character to integer value
+	data = [chars.index(i) for i in text + 'ŁŁŁ']			# Mapping each character to integer value
+	print(data)
 	if len(dims) == 0:									# Calculating dimensions
-		imglen = len(text) / 3 if color else len(text) 
+
+		imglen = (len(text) + 3) / 3 if color else (len(text) + 3)
 		dimx = round(sqrt(imglen))
 		dimy = round(imglen / dimx)
 		datalost = round((dimx * dimy) - imglen)
@@ -24,10 +26,10 @@ def strtoimg(text, color, scale, dims=[], chars=chars):
 	while True:
 		try:
 			a = Image.frombytes(mode, (dimx, dimy), bytes(data))
-			a = a.resize((a.size[0] * scale, a.size[1] * scale), resample=Image.BOX)
+			a = a.resize((dimx * scale, dimy * scale), resample=Image.BOX)
 			return a
 		except:
-			data.append(0)								# Adding blank data to fill out image resoultion
+			data.append(255)								# Adding blank data to fill out image resoultion
 	
 
 def imgtostr(img, color, scale, chars=chars, res=[]):
