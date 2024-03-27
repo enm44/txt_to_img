@@ -10,8 +10,7 @@ chars = [' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '
 
 
 def strtoimg(text, color, scale, dims=[], chars=chars):
-	data = [chars.index(i) for i in text + 'ŁŁŁ']			# Mapping each character to integer value
-	print(data)
+	data = [chars.index(i) for i in text]		# Mapping each character to integer value
 	if len(dims) == 0:									# Calculating dimensions
 
 		imglen = (len(text) + 3) / 3 if color else (len(text) + 3)
@@ -29,7 +28,7 @@ def strtoimg(text, color, scale, dims=[], chars=chars):
 			a = a.resize((dimx * scale, dimy * scale), resample=Image.BOX)
 			return a
 		except:
-			data.append(255)								# Adding blank data to fill out image resoultion
+			data.append(255)						# Adding blank data to fill out image resoultion
 	
 
 def imgtostr(img, color, scale, chars=chars, res=[]):
@@ -51,7 +50,7 @@ def imgtostr(img, color, scale, chars=chars, res=[]):
 	# GRAYSCALE: Getting the value of each pixel and mapping it to character
 
 	data = [chars[grid[x,y][p]] for y in range(column) for x in range(row) for p in range(3)] if color else [chars[grid[x,y]] for y in range(column ) for x in range(row)]
-	return ''.join(data).rstrip(' ').rstrip('Ł')						# Removing filler data
+	return ''.join(data).rstrip('ŁŁŁ')						# Removing filler data
 
 
 def Limgtostr(img, highchar, lowchar): # USED FOR LASER CNC, WORKS FOR BW IMAGES
@@ -64,19 +63,23 @@ def Limgtostr(img, highchar, lowchar): # USED FOR LASER CNC, WORKS FOR BW IMAGES
 
 
 def texttovid(text, framelength, name, fps, scale, color, test):
+
+	# creating frame
+	frame = strtoimg(''.join([' ' for i in range(framelength)]), color, scale)
+	dims = (int(frame.size[0] / scale), int(frame.size[1] / scale))
+	print('built frame')
 	
 	# splitting text into sections (framelength)
 	text = [text[i:i + framelength] for i in range(0, len(text), framelength)]
 	print('split text')
 
 	# creating images for each text section
-	res = [strtoimg((i + 'ŁŁ'), color, scale) for i in text]
+	res = [strtoimg(i, color, scale, dims=dims) for i in text]
 	print('created images')
 
 	if test:
-		tests = [True if imgtostr(res[i], color, scale).rstrip('ŁŁŁ') == text[i] else False for i in range(len(text))]
+		tests = [True if imgtostr(res[i], color, scale) == text[i] else False for i in range(len(text))]
 		print(tests)
-		return None
 
 	# creating video
 	codec = cv2.VideoWriter_fourcc(*'mp4v')
@@ -103,3 +106,6 @@ def test(text, color, scale):
 	a = strtoimg(text, color, scale)
 	a.show()
 	print(imgtostr(a, color, scale))
+
+text = 'kljasdkjasdlkjas'
+texttovid(text * 500, 36, 'test5', 8, 100, True, True)

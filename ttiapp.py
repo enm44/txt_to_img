@@ -8,11 +8,11 @@ def submitdata(mode, data):
 		test = texttoimage.test(data[0], data[2], data[1])
 
 		res = texttoimage.strtoimg(data[0], data[2], data[1])
-		display = tk.Label(m, image=ImageTk.PhotoImage(res))
-		display.grid(row=6)
+		# display = tk.Label(m, image=ImageTk.PhotoImage(res))
+		# display.grid(row=6)
 
 	if mode == 2:
-		texttoimage.texttovid(data[0], data[1], data[2], data[3], data[4], data[5])
+		texttoimage.texttovid(data[0], data[1], data[2], data[3], data[4], data[5], True)
 
 def renderchoice(mode):
 	if mode == 1:
@@ -55,7 +55,7 @@ def renderchoice(mode):
 		vidname.grid(row=6, column=1)
 		colorb.grid(row=7)
 		# text, framelength, name, fps, scale, color, test
-		submit = tk.Button(m, text='Submit', command=lambda: submitdata(1, [text.get(), int(framelength.get()), vidname.get(), int(fps.get()), int(scale.get()), True if color.get() == 1 else False, False])).grid(row=8)
+		submit = tk.Button(m, text='Submit', command=lambda: submitdata(2, [text.get(), int(framelength.get()), vidname.get(), int(fps.get()), int(scale.get()), True if color.get() == 1 else False, False])).grid(row=8)
 
 
 
